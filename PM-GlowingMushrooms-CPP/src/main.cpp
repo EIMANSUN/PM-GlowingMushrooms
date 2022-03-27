@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <FastLED.h>
+#include <LedConfig.h>
 
 
 
@@ -42,6 +43,11 @@ void loop() {
     leds[1] = CRGB(0, y2, 0);
     leds[2] = CRGB(0, 0, y3);
     FastLED.show();
+
+    int Period;
+    LedConfig led(1);
+    Period = led.getPeriod();
+    Serial.println(Period);
 
 
 
