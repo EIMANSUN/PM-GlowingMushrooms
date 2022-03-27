@@ -44,7 +44,7 @@ void loop() {
     leds[2] = CRGB(0, 0, y3);
     FastLED.show();
 
-    int Period;
+    static int Period;
     LedConfig led(1);
     Period = led.getPeriod();
     Serial.println(Period);
