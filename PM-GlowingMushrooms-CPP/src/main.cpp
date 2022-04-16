@@ -29,6 +29,11 @@ void loop() {
     int from = 0;
     int to = 255;
     runTime = millis();
+
+    static int Period;
+    static int min[3] = {0, 0, 0};
+    static short max[3] = {255, 255, 255};
+    static int p = 100;
     
 
     int y1 = 127.5 + 127.5 * sin(f1 * 2.0 * PI * (runTime / 1000.0));
@@ -44,8 +49,8 @@ void loop() {
     leds[2] = CRGB(0, 0, y3);
     FastLED.show();
 
-    static int Period;
-    LedConfig led(1);
+
+    LedConfig led(min, p);
     Period = led.getPeriod();
     Serial.println(Period);
 

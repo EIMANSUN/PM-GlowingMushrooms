@@ -10,12 +10,13 @@
 
 class LedConfig {
     public:
-        LedConfig(int period);
+        LedConfig(int *min, int period);  //short min[3], short max[3],
         int getPeriod();
 
 
-
     private:
+        int _min[3];
+        //short _max[3];
         int _period;
 };
 
