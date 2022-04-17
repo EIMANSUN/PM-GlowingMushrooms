@@ -1,3 +1,4 @@
 /RPI_env
 service_account.json
 source/json/ledConfig.json
+ledConfig.json
