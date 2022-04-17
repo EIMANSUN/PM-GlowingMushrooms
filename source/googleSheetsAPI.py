@@ -23,13 +23,15 @@ class glowingMushroomsAPI:
             return False
     
     def checkDiffrence(self, currentDataFrame, lattestDataFrame):
-        diffDataFrame = currentDataFrame - lattestDataFrame
+        diffDataFrame = (currentDataFrame - lattestDataFrame)
+        diffDataFrame['Diffrence'] = diffDataFrame.sum(axis=1)
+        diffDataFrame= (diffDataFrame.loc[diffDataFrame['Diffrence'] != 0]).drop('Diffrence', axis=1)
         return diffDataFrame
 
 
 
 
-ledConfigPath = "json/ledConfig.json"
+ledConfigPath = "ledConfig.json"
 
 
 gm = glowingMushroomsAPI('service_account.json', 'PM-GlowingMuhrooms', 'config')
@@ -41,6 +43,7 @@ print(len(latestLedConfig))
 
 print(gm.checkCounts(latestLedConfig, latestLedConfig))
 
+print(gm.checkDiffrence(latestLedConfig, latestLedConfig))
 
 # while True:
 #     print(gm.getLatestLedConfig())
