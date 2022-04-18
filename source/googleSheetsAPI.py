@@ -31,7 +31,7 @@ class glowingMushroomsAPI:
 
 
 
-ledConfigPath = "ledConfig.json"
+ledConfigPath = "source/json/ledConfig.json"
 
 
 gm = glowingMushroomsAPI('service_account.json', 'PM-GlowingMuhrooms', 'config')
