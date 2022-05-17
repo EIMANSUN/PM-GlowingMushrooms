@@ -1,8 +1,9 @@
-import board
-import neopixel
+#import board
+#import neopixel
 import json
 import time
 import math
+
 
 
 
@@ -11,10 +12,12 @@ class ledConfig():
 	def __init__(self, ledParam):
 		self.ledParam = ledParam
 
+	@staticmethod
 	def millis():
 		return round(time.time() * 1000)
 
-	def cosFunction(min, max, period, offset, x):
+	@staticmethod
+	def cosFunction( min, max, period, offset, x):
 		return round((((max-min)/2)+min)+(((max+min)/2)-min) * math.cos((1/period) * 2 * math.pi * (offset + x)))
 
 	def getRed(self):
@@ -48,4 +51,9 @@ pixels = neopixel.NeoPixel(board.D18, ledCount)
 
 while True:
 	for x in range(0, ledCount):
+		startTime = ledConfig.millis()
+
 		pixels[x] = (ledConfigList[x].getRed(), ledConfigList[x].getGreen(), ledConfigList[x].getBlue())
+
+		endTime = ledConfig.millis()
+		print(f"Looptime: {endTime - startTime} milliseconds")
