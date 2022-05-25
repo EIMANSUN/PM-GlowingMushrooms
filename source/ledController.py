@@ -1,14 +1,8 @@
-import board
-import neopixel
-import json
 import time
 import math
 
 
-
-
 class ledConfig():
-
 	def __init__(self, ledParam):
 		self.ledParam = ledParam
 
@@ -30,30 +24,5 @@ class ledConfig():
 		return ledConfig.cosFunction(self.ledParam['Min_B'], self.ledParam['Max_B'], self.ledParam['Period'], self.ledParam['Offset'], ledConfig.millis())
 
 
-
-#Setup
-with open('source/json/ledConfig.json') as json_file:
-    data = json.load(json_file)
-
-ledCount = len(data['LedNum'])
-
-ledConfigList = []
-for i in range(ledCount):
-	print(i)
-	singleLedConfig = {}
-	for key, value in data.items():
-		singleLedConfig[key] = value[str(i)]
-	ledConfigList.append(ledConfig(singleLedConfig))
-
-print(ledConfigList)
-
-pixels = neopixel.NeoPixel(board.D18, ledCount)
-
-while True:
-	for x in range(0, ledCount):
-		startTime = ledConfig.millis()
-
-		pixels[x] = (ledConfigList[x].getRed(), ledConfigList[x].getGreen(), ledConfigList[x].getBlue())
-
-		endTime = ledConfig.millis()
-		print(f"Looptime: {endTime - startTime} milliseconds")
+if __name__ == '__main__':
+    pass
