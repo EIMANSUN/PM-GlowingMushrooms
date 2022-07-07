@@ -1,4 +1,5 @@
 #Standard imports
+from asyncio import start_server
 import json
 import time
 import multiprocessing as mp
@@ -7,7 +8,7 @@ import multiprocessing as mp
 import pandas as pd
 import board
 import neopixel
-
+ 
 #Modules
 from googleSheetsAPI import glowingMushroomsAPI
 from  ledController import ledConfig
@@ -17,7 +18,14 @@ requestDelay = 10
 ledConfigPath = "source/json/ledConfig.json"
 ledConfigDiffPath = "source/json/ledConfigDiff.json"
 updateStatusPath = "source/json/updateStatus.json"
-gm = glowingMushroomsAPI('service_account.json', 'PM-GlowingMuhrooms', 'config')
+apiState = 0
+try:
+    gm = glowingMushroomsAPI('service_account.json', 'PM-GlowingMuhrooms', 'config')
+except:
+    apiState = 1
+finally:
+    print(f"API State - {apiState}")
+
 
 #Reset update status
 updateStatus = {"Update":0}
@@ -100,6 +108,7 @@ def setupLED(ledConfigPath):
 def loopLED(pixels, ledCount, ledConfigList, ledConfigDiffPath, updateStatusPath):
     updateCounter = 0
     while True:
+        startTime = time.time()
         #Check for UPDATE
         ledUpdateStatus = 0
         if updateCounter >= 50:
@@ -137,12 +146,15 @@ def loopLED(pixels, ledCount, ledConfigList, ledConfigDiffPath, updateStatusPath
             print(f"Saved - {updateStatusPath} by LED Controller")
 
         updateCounter += 1
+        endTime = (time.time() - startTime) * 1000
+        print(f"{endTime} ms")
 
 if __name__ == '__main__':
 
     #Initialise google sheets api
-    latestLedConfig = initializeGoogleAPI()
-    currentLedConfig = latestLedConfig
+    if apiState == 0:
+        latestLedConfig = initializeGoogleAPI()
+        currentLedConfig = latestLedConfig
 
     #Setup LED's
     setup = setupLED(ledConfigPath)
@@ -150,10 +162,15 @@ if __name__ == '__main__':
     ledCount = setup[1]
     ledConfigList = setup[2]
 
-    p1 = mp.Process(target=loopGoogleAPI, args=(latestLedConfig, currentLedConfig))
+    if apiState == 0:
+        p1 = mp.Process(target=loopGoogleAPI, args=(latestLedConfig, currentLedConfig))
+
+
     p2 = mp.Process(target=loopLED, args=(pixels, ledCount, ledConfigList, ledConfigDiffPath, updateStatusPath))
 
-    p1.start()
+    if apiState == 0:
+        p1.start()
+
     p2.start()
 
 
