@@ -1,5 +1,4 @@
 #Standard imports
-from asyncio import start_server
 import json
 import time
 import multiprocessing as mp
@@ -101,35 +100,53 @@ def setupLED(ledConfigPath):
         ledConfigList.append(ledConfig(singleLedConfig))
 
     print(ledConfigList)
-    pixels = neopixel.NeoPixel(board.D18, ledCount)
+    pixels = neopixel.NeoPixel(board.D18, ledCount, brightness=0.2, auto_write=False)
 
     return pixels, ledCount, ledConfigList
 
 def loopLED(pixels, ledCount, ledConfigList, ledConfigDiffPath, updateStatusPath):
     updateCounter = 0
+
+    def updateState(updateStatusPath, reset = 0):
+        if reset == 0:
+            try:
+                with open(updateStatusPath) as json_file:
+                    status = json.load(json_file)
+            except:
+                time.sleep(10)
+                status = updateState(updateStatusPath)
+            return status
+        else:
+            try:
+                updateStatus = {"Update":0}
+                with open(updateStatusPath, 'w') as outfile:
+                    json.dump(updateStatus, outfile)
+            except:
+                updateState(updateStatusPath, reset = 1)
+
     while True:
-        startTime = time.time()
         #Check for UPDATE
         ledUpdateStatus = 0
-        if updateCounter >= 50:
+        if updateCounter >= 200:
             with open(updateStatusPath) as json_file:
                 status = json.load(json_file)
                 if status['Update'] == 1:
                     ledUpdateStatus = 1
-                    with open(ledConfigDiffPath) as json_file:
-                        data = json.load(json_file)
+                with open(ledConfigDiffPath) as json_file:
+                    data = json.load(json_file)
                     print(f"Loaded - {updateStatusPath} by LED Controller")
 
                     ledId = data['LedNum'].values()
 
-                    diffLedConfig = {}
-                    for i in ledId:
-                        singleLedConfig = {}
-                        for key, value in data.items():
-                            singleLedConfig[key] = value[str(i)]
-                        diffLedConfig[str(i)] = singleLedConfig
-                    print(diffLedConfig)
-                    updateCounter = 0
+                diffLedConfig = {}
+                for i in ledId:
+                    singleLedConfig = {}
+                    for key, value in data.items():
+                        singleLedConfig[key] = value[str(i)]
+                    diffLedConfig[str(i)] = singleLedConfig
+                print(diffLedConfig)
+            
+            updateCounter = 0
 
         for x in range(0, ledCount):
             if ledUpdateStatus == 1:
@@ -139,6 +156,8 @@ def loopLED(pixels, ledCount, ledConfigList, ledConfigDiffPath, updateStatusPath
 
             pixels[x] = (ledConfigList[x].getRed(), ledConfigList[x].getGreen(), ledConfigList[x].getBlue())
 
+        pixels.show()
+
         if ledUpdateStatus == 1:
             updateStatus = {"Update":0}
             with open(updateStatusPath, 'w') as outfile:
@@ -146,8 +165,7 @@ def loopLED(pixels, ledCount, ledConfigList, ledConfigDiffPath, updateStatusPath
             print(f"Saved - {updateStatusPath} by LED Controller")
 
         updateCounter += 1
-        endTime = (time.time() - startTime) * 1000
-        print(f"{endTime} ms")
+
 
 if __name__ == '__main__':
 

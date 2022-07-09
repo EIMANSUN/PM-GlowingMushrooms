@@ -9,7 +9,7 @@ function Start-SSHTransfer {
             Start-SSHTransfer -sourceDir $file.FullName -destDir ($destDir + "/$($file.Name)")
         } 
         else {
-            scp $file.FullName eimansun@RPI-Z.local:$destDir
+            scp $file.FullName eimansun@192.168.0.118:$destDir
         }
 
         write-host $destDir
