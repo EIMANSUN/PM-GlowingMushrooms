@@ -18,12 +18,19 @@ ledConfigPath = "source/json/ledConfig.json"
 ledConfigDiffPath = "source/json/ledConfigDiff.json"
 updateStatusPath = "source/json/updateStatus.json"
 apiState = 0
-try:
-    gm = glowingMushroomsAPI('service_account.json', 'PM-GlowingMuhrooms', 'config')
-except:
-    apiState = 1
-finally:
-    print(f"API State - {apiState}")
+
+connFailCounter = 0
+while connFailCounter <= 10:
+    try:
+        gm = glowingMushroomsAPI('service_account.json', 'PM-GlowingMuhrooms', 'config')
+        apiState = 0
+        break
+    except:
+        apiState = 1
+        connFailCounter += 1
+        time.sleep(requestDelay)
+        continue
+print(f"API State - {apiState}")
 
 
 #Reset update status
@@ -122,16 +129,16 @@ def loopLED(pixels, ledCount, ledConfigList, ledConfigDiffPath, updateStatusPath
                 with open(updateStatusPath, 'w') as outfile:
                     json.dump(updateStatus, outfile)
             except:
+                time.sleep(10)
                 updateState(updateStatusPath, reset = 1)
 
     while True:
         #Check for UPDATE
         ledUpdateStatus = 0
         if updateCounter >= 200:
-            with open(updateStatusPath) as json_file:
-                status = json.load(json_file)
-                if status['Update'] == 1:
-                    ledUpdateStatus = 1
+            status = updateState(updateStatusPath)
+            if status['Update'] == 1:
+                ledUpdateStatus = 1
                 with open(ledConfigDiffPath) as json_file:
                     data = json.load(json_file)
                     print(f"Loaded - {updateStatusPath} by LED Controller")
@@ -159,9 +166,7 @@ def loopLED(pixels, ledCount, ledConfigList, ledConfigDiffPath, updateStatusPath
         pixels.show()
 
         if ledUpdateStatus == 1:
-            updateStatus = {"Update":0}
-            with open(updateStatusPath, 'w') as outfile:
-                json.dump(updateStatus, outfile)
+            updateState(updateStatusPath, reset = 1)
             print(f"Saved - {updateStatusPath} by LED Controller")
 
         updateCounter += 1
